@@ -1,10 +1,11 @@
 require('dotenv').config();
 const { createServer } = require('node:http');
+const { PrismaClient } = require('@prisma/client');
 const {
-  shortenUrl,
-  getUrl,
-  deleteUrl,
-} = require('./controllers/controllers.js');
+  shortenURL,
+  getURL,
+  deleteURL,
+} = require('./src/controllers/controllers.js');
 
 const hostname = process.env.HOSTNAME || '127.0.0.1';
 const port = process.env.PORT || 3000;
@@ -18,13 +19,16 @@ const server = createServer((request, response) => {
 
   try {
     if (request.method === 'POST' && request.url === '/shorten') {
-      shortenUrl(request, response);
+      shortenURL(request, response);
+      console.log('POST /shorten');
     }
-    if (request.method === 'GET' && request.url.startsWith('/')) {
-      getUrl(request, response);
+    else if (request.method === 'GET' && request.url.startsWith('/')) {
+      getURL(request, response);
+      console.log(`GET ${request.url}`);
     }
-    if (request.method === 'DELETE' && request.url.startsWith('/')) {
-      deleteUrl(request, response);
+    else if (request.method === 'DELETE' && request.url.startsWith('/')) {
+      deleteURL(request, response);
+      console.log(`DELETE ${request.url}`);
     } else {
       response.statusCode = 404;
       response.end(JSON.stringify({ error: 'Not Found' }));

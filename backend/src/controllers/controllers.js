@@ -4,32 +4,83 @@ const { nanoid } = require('nanoid');
 
 const prisma = new PrismaClient();
 
-async function shortenURL(originalUrl) {
+async function shortenURL(request, response) {
   const shortCode = nanoid(10);
 
-  const url = await prisma.url.create({
-    data: {
-      shortCode: shortCode,
-      originalUrl: originalUrl,
-    },
+  let body = '';
+  request.on('data', (chunk) => {
+    body += chunk;
   });
-  return url;
+
+  request.on('end', async () => {
+    try {
+      const { originalUrl } = JSON.parse(body);
+      const url = await prisma.url.create({
+        data: {
+          originalUrl: originalUrl,
+          shortCode: shortCode,
+        }
+      });
+      response.end(JSON.stringify({ shortCode: url.shortCode }));
+    } catch (error) {
+      console.error('Error shortening URL:', error);
+      response.statusCode = 500;
+      response.end(JSON.stringify({ error: 'Internal Server Error' }));
+    }
+  });
 }
 
-async function getURL(shortCode) {
-  const originalUrl = await prisma.url.findUnique({
-    where: {
-      shortCode: shortCode,
-    },
+async function getURL(request, response) {
+  let body = '';
+  request.on('data', (chunk) => {
+    body += chunk;
   });
-  return originalUrl;
+  
+  request.on('end', async () => {
+    try{
+      const shortCode = request.url.slice(1);
+      const url = await prisma.url.findUnique({
+        where : {
+          shortCode: shortCode,
+        }
+      });
+      if (!url) {
+        response.statusCode = 404;
+        response.end(JSON.stringify({ error: 'URL not found' }));
+        return;
+      }
+      response.end(JSON.stringify({ originalUrl: url.originalUrl }));
+    } catch (error) {
+      console.error('Error retrieving URL:', error);
+      response.statusCode = 500;
+      response.end(JSON.stringify({ error: 'Internal Server Error' }));
+    }
+  });
 }
 
-async function deleteURL(shortCode) {
-  await prisma.url.delete({
-    where: {
-      shortCode: shortCode,
-    },
-  });
-  return shortCode;
+async function deleteURL(request, response) {
+  try {
+    const shortCode = request.url.slice(1);
+    const urlToDelete = await prisma.url.delete({
+      where: {
+        shortCode: shortCode,
+      }
+    });
+    if (!urlToDelete) {
+      response.statusCode = 404;
+      response.end(JSON.stringify({ error: 'URL not found' }));
+      return;
+    }
+    response.end(JSON.stringify({ message: 'URL deleted successfully' }));
+  } catch (error) {
+    console.error('Error deleting URL:', error);
+    response.statusCode = 500;
+    response.end(JSON.stringify({ error: 'Internal Server Error' }));
+  }
 }
+
+module.exports = {
+  shortenURL,
+  getURL,
+  deleteURL,
+};
