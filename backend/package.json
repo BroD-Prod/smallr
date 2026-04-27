@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "lint": "eslint",
+    "format": "prettier --write .",
+    "test": "playwright test"
   },
   "keywords": [
     "url",
@@ -19,6 +22,10 @@
     "nanoid": "^5.1.9"
   },
   "devDependencies": {
-    "prisma": "^5.13.0"
+    "prisma": "^5.13.0",
+    "eslint": "^10.0.1",
+    "eslint-config-next": "^0.2.4",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1"
   }
 }
