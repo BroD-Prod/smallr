@@ -8,7 +8,7 @@ const {
 } = require('./src/controllers/controllers.js');
 
 const hostname = process.env.HOSTNAME || '127.0.0.1';
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const prisma = new PrismaClient();
 
 const server = createServer((request, response) => {
@@ -16,6 +16,14 @@ const server = createServer((request, response) => {
   response.setHeader('Content-Type', 'application/json');
   response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type'); 
+
+  // Handle preflight OPTIONS request
+  if (request.method === 'OPTIONS') {
+    response.statusCode = 200;
+    response.end();
+    return;
+  }
 
   try {
     if (request.method === 'POST' && request.url === '/shorten') {

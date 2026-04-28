@@ -31,12 +31,6 @@ async function shortenURL(request, response) {
 }
 
 async function getURL(request, response) {
-  let body = '';
-  request.on('data', (chunk) => {
-    body += chunk;
-  });
-  
-  request.on('end', async () => {
     try{
       const shortCode = request.url.slice(1);
       const url = await prisma.url.findUnique({
@@ -49,14 +43,15 @@ async function getURL(request, response) {
         response.end(JSON.stringify({ error: 'URL not found' }));
         return;
       }
-      response.end(JSON.stringify({ originalUrl: url.originalUrl }));
+      response.statusCode = 301;
+      response.setHeader('Location', url.originalUrl);
+      response.end();
     } catch (error) {
       console.error('Error retrieving URL:', error);
       response.statusCode = 500;
       response.end(JSON.stringify({ error: 'Internal Server Error' }));
     }
-  });
-}
+  }
 
 async function deleteURL(request, response) {
   try {
