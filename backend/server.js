@@ -16,9 +16,10 @@ const server = createServer((request, response) => {
   response.setHeader('Content-Type', 'application/json');
   response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE');
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type'); 
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Handle preflight OPTIONS request
+
+  // Handle preflight OPTIONS requestx
   if (request.method === 'OPTIONS') {
     response.statusCode = 200;
     response.end();
@@ -29,12 +30,10 @@ const server = createServer((request, response) => {
     if (request.method === 'POST' && request.url === '/shorten') {
       shortenURL(request, response);
       console.log('POST /shorten');
-    }
-    else if (request.method === 'GET' && request.url.startsWith('/')) {
+    } else if (request.method === 'GET' && request.url.startsWith('/')) {
       getURL(request, response);
       console.log(`GET ${request.url}`);
-    }
-    else if (request.method === 'DELETE' && request.url.startsWith('/')) {
+    } else if (request.method === 'DELETE' && request.url.startsWith('/')) {
       deleteURL(request, response);
       console.log(`DELETE ${request.url}`);
     } else {

@@ -1,13 +1,34 @@
 import './home.css';
 import { useState } from 'react';
+import { nanoid } from 'nanoid';
+import { useEffect } from 'react';
 
 
 function Home() {
     const [url, setUrl] = useState('');
     const [shortenedUrl, setShortenedUrl] = useState('');
+    const [userId, setUserId] = useState('');
+
+    useEffect(() => {
+        let storedUserId = localStorage.getItem('userId');
+
+        if(!storedUserId){
+            storedUserId = nanoid(20);
+            localStorage.setItem('userId', storedUserId);
+            console.log('Generated new user ID:', storedUserId);
+        } else{
+            console.log('Existing user ID found:', storedUserId);
+        }
+        setUserId(storedUserId);
+    }, []);
 
     function shortenUrl(){
         let urlToShorten = url;
+
+        if(!userId) {
+            alert('User ID not found. Please refresh the page and try again.');
+            return;
+        }
 
         if(!urlToShorten || urlToShorten.trim() === '') {
             alert('Please enter a valid URL');
@@ -23,7 +44,7 @@ function Home() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ originalUrl: urlToShorten }),
+            body: JSON.stringify({ originalUrl: urlToShorten, userId }),
         })
         .then(response => response.json())
         .then(data => {

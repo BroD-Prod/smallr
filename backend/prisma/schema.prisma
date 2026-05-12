@@ -9,8 +9,10 @@ generator client {
 
 model Url {
   id          Int     @id @default(autoincrement())
-  shortCode   String  @unique
-  originalUrl String
+  shortCode   String  
+  originalUrl String  @unique
+  numOfCreatedUrls Int @default(0)
+  userId      String  
   clicks      Int     @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
