@@ -27,13 +27,11 @@ async function shortenURL(request, response) {
         return;
       }
 
-      const timestamp = new Date();
       const url = await prisma.url.create({
         data: {
           shortCode: shortCode,
           userId: userId,
           originalUrl: originalUrl,
-          timestamp: timestamp,
         },
       });
       response.end(JSON.stringify({ shortCode: url.shortCode }));
@@ -46,32 +44,26 @@ async function shortenURL(request, response) {
 }
 
 async function getURL(request, response) {
-  let body = '';
-  request.on('data', (chunk) => {
-    body += chunk;
-  });
-  request.on('end', async () => {
-    try {
-      const shortCode = JSON.parse(body).shortCode;
-      const url = await prisma.url.findUnique({
-        where: {
-          shortCode: shortCode,
-        },
-      });
-      if (!url) {
-        response.statusCode = 404;
-        response.end(JSON.stringify({ error: 'URL not found' }));
-        return;
-      }
-      response.statusCode = 301;
-      response.setHeader('Location', url.originalUrl);
-      response.end();
-    } catch (error) {
-      console.error('Error retrieving URL:', error);
-      response.statusCode = 500;
-      response.end(JSON.stringify({ error: 'Internal Server Error' }));
+  try {
+    const shortCode = request.url.slice(1);
+    const url = await prisma.url.findUnique({
+      where: {
+        shortCode: shortCode,
+      },
+    });
+    if (!url) {
+      response.statusCode = 404;
+      response.end(JSON.stringify({ error: 'URL not found' }));
+      return;
     }
-  });
+    response.statusCode = 301;
+    response.setHeader('Location', url.originalUrl);
+    response.end();
+  } catch (error) {
+    console.error('Error retrieving URL:', error);
+    response.statusCode = 500;
+    response.end(JSON.stringify({ error: 'Internal Server Error' }));
+  }
 }
 
 async function deleteURL(request, response) {
